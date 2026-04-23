@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Scope Builder | Old North Analytics</title>
+  <style>
+    /* ============================================================
+       CSS VARIABLES (ONA Brand)
+    ============================================================ */
+    :root {
+      --green:       #22493D;
+      --green-mid:   #537C6F;
+      --green-light: #EAF6F2;
+      --green-dark:  #1a3830;
+      --accent:      #A8D5C8;
+      --white:       #ffffff;
+      --text:        #1A1A1A;
+      --border:      #D0E8E0;
+      --gray-light:  #E5E5E5;
+      --gray-mid:    #999999;
+      --radius:      8px;
+      --transition:  0.25s ease;
+      --font:        'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ona-scope-root {
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 48px;
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .ona-scope-header {
+      width: 100%;
+      max-width: 800px;
+      padding: 28px 0 0;
+      text-align: center;
+    }
+
+    .ona-scope-logo-text {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    /* ============================================================
+       PROGRESS BAR
+    ============================================================ */
+    .ona-scope-progress {
+      width: 100%;
+      max-width: 800px;
+      margin: 24px 0 0;
+      display: none;
+    }
+
+    .ona-scope-progress.visible {
+      display: block;
+    }
+
+    .ona-scope-progress-label {
+      font-size: 13px;
+      color: var(--green-mid);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .ona-scope-progress-track {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ona-scope-progress-step {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--gray-light);
+      transition: background var(--transition);
+    }
+
+    .ona-scope-progress-step.completed {
+      background: var(--accent);
+    }
+
+    .ona-scope-progress-step.current {
+      background: var(--green);
+    }
+
+    /* ============================================================
+       MAIN CONTAINER
+    ============================================================ */
+    .ona-scope-main {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 32px;
+      position: relative;
+    }
+
+    /* ============================================================
+       STEP PANELS
+    ============================================================ */
+    .ona-scope-step {
+      display: none;
+      animation: ona-fade-in 0.25s ease;
+    }
+
+    .ona-scope-step.active {
+      display: block;
+    }
+
+    @keyframes ona-fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       STEP 1: WELCOME
+    ============================================================ */
+    .ona-scope-welcome {
+      text-align: center;
+      padding: 56px 24px;
+      background: var(--green-light);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .ona-scope-welcome h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .ona-scope-welcome p {
+      font-size: 1.05rem;
+      color: var(--green-mid);
+      max-width: 480px;
+      margin: 0 auto 32px;
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .ona-scope-btn {
+      display: inline-block;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: var(--radius);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .ona-scope-btn:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .ona-scope-btn-primary {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    .ona-scope-btn-primary:hover {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+    }
+
+    .ona-scope-btn-secondary {
+      background: var(--white);
+      color: var(--green);
+      border-color: var(--border);
+    }
+
+    .ona-scope-btn-secondary:hover {
+      border-color: var(--green-mid);
+      background: var(--green-light);
+    }
+
+    .ona-scope-btn-outline {
+      background: transparent;
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .ona-scope-btn-outline:hover {
+      background: var(--green-light);
+    }
+
+    .ona-scope-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ============================================================
+       STEP NAV (Back / Next)
+    ============================================================ */
+    .ona-scope-step-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      gap: 12px;
+    }
+
+    .ona-scope-step-nav-right {
+      margin-left: auto;
+    }
+
+    /* ============================================================
+       STEP 2: CATEGORY CARDS
+    ============================================================ */
+    .ona-scope-step-heading {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .ona-scope-step-sub {
+      font-size: 0.95rem;
+      color: var(--green-mid);
+      margin-bottom: 24px;
+    }
+
+    .ona-scope-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .ona-scope-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--white);
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      text-align: left;
+    }
+
+    .ona-scope-card:hover {
+      border-color: var(--green-mid);
+      background: var(--green-light);
+      box-shadow: 0 2px 8px rgba(34,73,61,0.08);
+    }
+
+    .ona-scope-card.selected {
+      border-color: var(--green);
+      background: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(34,73,61,0.12);
+    }
+
+    .ona-scope-card:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .ona-scope-card-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      color: var(--green);
+    }
+
+    .ona-scope-card-body {
+      flex: 1;
+    }
+
+    .ona-scope-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 3px;
+    }
+
+    .ona-scope-card-desc {
+      font-size: 0.85rem;
+      color: var(--green-mid);
+      line-height: 1.4;
+    }
+
+    .ona-scope-error-msg {
+      font-size: 0.875rem;
+      color: #c0392b;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .ona-scope-error-msg.visible {
+      display: block;
+    }
+
+    /* ============================================================
+       STEP 3: SCOPING QUESTIONS
+    ============================================================ */
+    .ona-scope-form {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .ona-scope-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ona-scope-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .ona-scope-helper {
+      font-size: 0.8rem;
+      color: var(--gray-mid);
+      margin-top: -4px;
+    }
+
+    /* Radio groups */
+    .ona-scope-radio-group,
+    .ona-scope-check-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ona-scope-radio-group label,
+    .ona-scope-check-group label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color var(--transition), background var(--transition);
+      user-select: none;
+    }
+
+    .ona-scope-radio-group label:hover,
+    .ona-scope-check-group label:hover {
+      border-color: var(--green-mid);
+      background: var(--green-light);
+    }
+
+    .ona-scope-radio-group input[type="radio"],
+    .ona-scope-check-group input[type="checkbox"] {
+      accent-color: var(--green);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .ona-scope-radio-group input[type="radio"]:checked + span,
+    .ona-scope-check-group input[type="checkbox"]:checked + span {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* Text inputs */
+    .ona-scope-input,
+    .ona-scope-textarea {
+      font-family: var(--font);
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      width: 100%;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      line-height: 1.5;
+    }
+
+    .ona-scope-input:focus,
+    .ona-scope-textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(34,73,61,0.1);
+    }
+
+    .ona-scope-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* ============================================================
+       STEP 4: PROJECT DETAILS
+    ============================================================ */
+    /* reuses form styles above */
+
+    /* ============================================================
+       STEP 5: SUMMARY
+    ============================================================ */
+    .ona-scope-summary-box {
+      background: var(--green-light);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      white-space: pre-wrap;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text);
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .ona-scope-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .ona-scope-copy-confirm {
+      font-size: 0.8rem;
+      color: var(--green);
+      font-weight: 600;
+      align-self: center;
+      display: none;
+    }
+
+    .ona-scope-copy-confirm.visible {
+      display: inline;
+    }
+
+    .ona-scope-contact-line {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: var(--green-mid);
+      text-align: center;
+    }
+
+    .ona-scope-contact-line a {
+      color: var(--green);
+      text-decoration: underline;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 640px) {
+      .ona-scope-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .ona-scope-welcome h1 {
+        font-size: 1.5rem;
+      }
+
+      .ona-scope-step-heading {
+        font-size: 1.2rem;
+      }
+
+      .ona-scope-action-row {
+        flex-direction: column;
+      }
+
+      .ona-scope-action-row .ona-scope-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .ona-scope-summary-box {
+        padding: 16px 18px;
+        max-height: 300px;
+      }
+
+      .ona-scope-welcome {
+        padding: 36px 16px;
+      }
+    }
+
+    @media (min-width: 641px) and (max-width: 900px) {
+      .ona-scope-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="ona-scope-root" id="ona-scope-root">
+
+  <!-- Header -->
+  <header class="ona-scope-header">
+    <div class="ona-scope-logo-text">Old North Analytics</div>
+  </header>
+
+  <!-- Progress indicator (hidden on step 1) -->
+  <nav class="ona-scope-progress" id="ona-progress" aria-label="Step progress">
+    <div class="ona-scope-progress-label" id="ona-progress-label">Step 2 of 5</div>
+    <div class="ona-scope-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="2">
+      <div class="ona-scope-progress-step" id="ona-ps-1"></div>
+      <div class="ona-scope-progress-step" id="ona-ps-2"></div>
+      <div class="ona-scope-progress-step" id="ona-ps-3"></div>
+      <div class="ona-scope-progress-step" id="ona-ps-4"></div>
+    </div>
+  </nav>
+
+  <main class="ona-scope-main" id="ona-scope-main">
+
+    <!-- =========================================================
+         STEP 1: WELCOME
+    ========================================================== -->
+    <section class="ona-scope-step active" id="ona-step-1" aria-label="Welcome">
+      <div class="ona-scope-welcome">
+        <h1>Tell us what you need.</h1>
+        <p>Answer a few questions and we will put together a project summary you can send us. Takes about 2 minutes.</p>
+        <button class="ona-scope-btn ona-scope-btn-primary" onclick="onaGoTo(2)">Get Started</button>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         STEP 2: CATEGORY SELECTION
+    ========================================================== -->
+    <section class="ona-scope-step" id="ona-step-2" aria-label="Select service category">
+      <h2 class="ona-scope-step-heading">What kind of help are you looking for?</h2>
+      <p class="ona-scope-step-sub">Select the option that best describes your project. You can explain further on the next screen.</p>
+
+      <div class="ona-scope-cards" role="radiogroup" aria-label="Service categories">
+
+        <!-- 1. KPI Dashboard -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="KPI Dashboard" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><polyline points="7 10 10 7 13 10 17 6"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">KPI Dashboard</div>
+            <div class="ona-scope-card-desc">I need a dashboard to track my business metrics</div>
+          </div>
+        </button>
+
+        <!-- 2. Presentation Build -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Presentation Build" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Presentation Build</div>
+            <div class="ona-scope-card-desc">I need a professional presentation designed and built</div>
+          </div>
+        </button>
+
+        <!-- 3. Workbook or Reporting Tool -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Workbook or Reporting Tool" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Workbook or Reporting Tool</div>
+            <div class="ona-scope-card-desc">I need an Excel workbook, Google Sheet, or reporting system built or fixed</div>
+          </div>
+        </button>
+
+        <!-- 4. Financial Model -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Financial Model" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Financial Model</div>
+            <div class="ona-scope-card-desc">I need a forecast, budget tool, or financial analysis built</div>
+          </div>
+        </button>
+
+        <!-- 5. Process Documentation -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Process Documentation" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Process Documentation</div>
+            <div class="ona-scope-card-desc">I need my business processes mapped out and documented</div>
+          </div>
+        </button>
+
+        <!-- 6. Data Cleanup -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Data Cleanup" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Data Cleanup</div>
+            <div class="ona-scope-card-desc">My data is a mess and I need someone to organize it</div>
+          </div>
+        </button>
+
+        <!-- 7. Operations Assessment -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Operations Assessment" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M21 12h-2M5 12H3M18.66 18.66l-1.41-1.41M6.75 6.75L5.34 5.34M12 21v-2M12 5V3"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Operations Assessment</div>
+            <div class="ona-scope-card-desc">I need someone to look at how my business operates and tell me where the problems are</div>
+          </div>
+        </button>
+
+        <!-- 8. Something Else -->
+        <button class="ona-scope-card" role="radio" aria-checked="false" data-category="Something Else" onclick="onaSelectCategory(this)" tabindex="0">
+          <svg class="ona-scope-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div class="ona-scope-card-body">
+            <div class="ona-scope-card-title">Something Else</div>
+            <div class="ona-scope-card-desc">I have a project that does not fit these categories</div>
+          </div>
+        </button>
+
+      </div>
+
+      <div class="ona-scope-error-msg" id="ona-cat-error" role="alert">Please select a service to continue.</div>
+
+      <div class="ona-scope-step-nav">
+        <button class="ona-scope-btn ona-scope-btn-secondary" onclick="onaGoTo(1)">&larr; Back</button>
+        <button class="ona-scope-btn ona-scope-btn-primary ona-scope-step-nav-right" onclick="onaAdvanceFrom2()">Next &rarr;</button>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         STEP 3: SCOPING QUESTIONS (dynamic)
+    ========================================================== -->
+    <section class="ona-scope-step" id="ona-step-3" aria-label="Scoping questions">
+      <h2 class="ona-scope-step-heading" id="ona-step3-heading">Tell us a bit more.</h2>
+      <p class="ona-scope-step-sub">All questions are optional, but the more you share, the better we can help. Skip anything that does not apply.</p>
+
+      <div class="ona-scope-form" id="ona-scoping-form">
+        <!-- Injected dynamically by JS -->
+      </div>
+
+      <div class="ona-scope-step-nav">
+        <button class="ona-scope-btn ona-scope-btn-secondary" onclick="onaGoTo(2)">&larr; Back</button>
+        <button class="ona-scope-btn ona-scope-btn-primary ona-scope-step-nav-right" onclick="onaGoTo(4)">Next &rarr;</button>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         STEP 4: PROJECT DETAILS
+    ========================================================== -->
+    <section class="ona-scope-step" id="ona-step-4" aria-label="Project details">
+      <h2 class="ona-scope-step-heading">A few more details.</h2>
+      <p class="ona-scope-step-sub">This helps us understand the context and set expectations for our first conversation.</p>
+
+      <div class="ona-scope-form">
+
+        <div class="ona-scope-field">
+          <label class="ona-scope-label" for="ona-business">What is your business?</label>
+          <input class="ona-scope-input" type="text" id="ona-business" placeholder="e.g., landscaping company, retail store, consulting firm" autocomplete="off" />
+        </div>
+
+        <div class="ona-scope-field">
+          <span class="ona-scope-label" id="ona-urgency-label">What is the best way to describe the urgency?</span>
+          <div class="ona-scope-radio-group" role="radiogroup" aria-labelledby="ona-urgency-label">
+            <label><input type="radio" name="ona-urgency" value="I need this yesterday" /><span>I need this yesterday</span></label>
+            <label><input type="radio" name="ona-urgency" value="Within the next 2 weeks" /><span>Within the next 2 weeks</span></label>
+            <label><input type="radio" name="ona-urgency" value="Within the next month" /><span>Within the next month</span></label>
+            <label><input type="radio" name="ona-urgency" value="No hard deadline" /><span>No hard deadline</span></label>
+          </div>
+        </div>
+
+        <div class="ona-scope-field">
+          <span class="ona-scope-label" id="ona-prior-label">Have you worked with a consultant or freelancer before?</span>
+          <div class="ona-scope-radio-group" role="radiogroup" aria-labelledby="ona-prior-label">
+            <label><input type="radio" name="ona-prior" value="Yes" /><span>Yes</span></label>
+            <label><input type="radio" name="ona-prior" value="No" /><span>No</span></label>
+            <label><input type="radio" name="ona-prior" value="This is my first time" /><span>This is my first time</span></label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ona-scope-step-nav">
+        <button class="ona-scope-btn ona-scope-btn-secondary" onclick="onaGoTo(3)">&larr; Back</button>
+        <button class="ona-scope-btn ona-scope-btn-primary ona-scope-step-nav-right" onclick="onaGenerateSummary()">Generate Summary &rarr;</button>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         STEP 5: SUMMARY
+    ========================================================== -->
+    <section class="ona-scope-step" id="ona-step-5" aria-label="Project summary">
+      <h2 class="ona-scope-step-heading">Here is your project summary.</h2>
+      <p class="ona-scope-step-sub">Copy it to your clipboard or send it directly to us by email. We will follow up within one business day.</p>
+
+      <div class="ona-scope-summary-box" id="ona-summary-display" tabindex="0" aria-label="Generated project summary">
+        <!-- Filled by JS -->
+      </div>
+
+      <div class="ona-scope-action-row">
+        <button class="ona-scope-btn ona-scope-btn-primary" onclick="onaCopy()">Copy to Clipboard</button>
+        <button class="ona-scope-btn ona-scope-btn-outline" id="ona-email-btn" onclick="onaEmail()">Email This to Old North</button>
+        <button class="ona-scope-btn ona-scope-btn-secondary" onclick="onaReset()">Start Over</button>
+        <span class="ona-scope-copy-confirm" id="ona-copy-confirm" aria-live="polite">Copied!</span>
+      </div>
+
+      <p class="ona-scope-contact-line">
+        Questions? Call us at <a href="tel:+19193071722">919-307-1722</a> or email <a href="mailto:info@oldnorthanalytics.com">info@oldnorthanalytics.com</a>
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ================================================================
+   ONA SCOPE BUILDER - Application State & Logic
+================================================================ */
+
+var ONA = {
+  currentStep: 1,
+  selectedCategory: null,
+  scopingAnswers: {},
+  generatedText: ''
+};
+
+/* ----------------------------------------------------------------
+   NAVIGATION
+---------------------------------------------------------------- */
+function onaGoTo(step) {
+  var current = document.getElementById('ona-step-' + ONA.currentStep);
+  var next    = document.getElementById('ona-step-' + step);
+  if (!next) return;
+
+  current.classList.remove('active');
+  next.classList.add('active');
+  ONA.currentStep = step;
+
+  onaUpdateProgress(step);
+
+  // Scroll to top of widget
+  document.getElementById('ona-scope-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function onaAdvanceFrom2() {
+  var err = document.getElementById('ona-cat-error');
+  if (!ONA.selectedCategory) {
+    err.classList.add('visible');
+    return;
+  }
+  err.classList.remove('visible');
+  onaRenderScopingQuestions(ONA.selectedCategory);
+  onaGoTo(3);
+}
+
+/* ----------------------------------------------------------------
+   PROGRESS INDICATOR
+---------------------------------------------------------------- */
+function onaUpdateProgress(step) {
+  var prog = document.getElementById('ona-progress');
+  var label = document.getElementById('ona-progress-label');
+
+  if (step === 1) {
+    prog.classList.remove('visible');
+    return;
+  }
+
+  prog.classList.add('visible');
+  // steps 2-5 map to progress segments 1-4
+  var seg = step - 1; // 1..4
+  label.textContent = 'Step ' + step + ' of 5';
+
+  for (var i = 1; i <= 4; i++) {
+    var el = document.getElementById('ona-ps-' + i);
+    el.classList.remove('completed', 'current');
+    if (i < seg) el.classList.add('completed');
+    else if (i === seg) el.classList.add('current');
+  }
+
+  var track = prog.querySelector('.ona-scope-progress-track');
+  track.setAttribute('aria-valuenow', step);
+}
+
+/* ----------------------------------------------------------------
+   CATEGORY SELECTION
+---------------------------------------------------------------- */
+function onaSelectCategory(card) {
+  var cards = document.querySelectorAll('.ona-scope-card');
+  cards.forEach(function(c) {
+    c.classList.remove('selected');
+    c.setAttribute('aria-checked', 'false');
+  });
+  card.classList.add('selected');
+  card.setAttribute('aria-checked', 'true');
+  ONA.selectedCategory = card.getAttribute('data-category');
+  ONA.scopingAnswers = {};
+
+  var err = document.getElementById('ona-cat-error');
+  err.classList.remove('visible');
+}
+
+/* ----------------------------------------------------------------
+   SCOPING QUESTIONS DEFINITIONS
+---------------------------------------------------------------- */
+var ONA_QUESTIONS = {
+
+  'KPI Dashboard': [
+    {
+      id: 'kpi_tool', type: 'radio', label: 'What tool do you want this built in?',
+      options: ['Excel', 'Google Sheets', 'Power BI', 'Not sure']
+    },
+    {
+      id: 'kpi_metrics', type: 'radio', label: 'How many metrics do you need to track?',
+      options: ['1-5', '6-10', '11-20', 'More than 20', 'Not sure']
+    },
+    {
+      id: 'kpi_data', type: 'checkbox', label: 'Where does your data currently live?',
+      options: ['Spreadsheets', 'Accounting software', 'CRM', 'POS system', 'Paper records', 'Other']
+    },
+    {
+      id: 'kpi_freq', type: 'radio', label: 'How often do you need the dashboard updated?',
+      options: ['Daily', 'Weekly', 'Monthly', 'Quarterly']
+    },
+    {
+      id: 'kpi_sample', type: 'radio', label: 'Do you have sample data or reports you can share?',
+      options: ['Yes', 'No', 'Not sure']
+    },
+    { id: 'kpi_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Presentation Build': [
+    {
+      id: 'pres_purpose', type: 'radio', label: 'What is the presentation for?',
+      options: ['Investor pitch', 'Client proposal', 'Internal meeting', 'Conference or event', 'Training', 'Other']
+    },
+    {
+      id: 'pres_slides', type: 'radio', label: 'How many slides do you need?',
+      options: ['Under 10', '10-20', '20-40', 'Over 40', 'Not sure']
+    },
+    {
+      id: 'pres_content', type: 'radio', label: 'Do you have content ready or do you need help writing it?',
+      options: ['Content is ready', 'I have rough notes', 'I need help with content', 'Starting from scratch']
+    },
+    {
+      id: 'pres_brand', type: 'radio', label: 'Do you have brand guidelines or a template?',
+      options: ['Yes', 'No', 'Not sure what that means']
+    },
+    {
+      id: 'pres_deadline', type: 'radio', label: 'What is your deadline?',
+      options: ['This week', 'Next 2 weeks', 'This month', 'No rush']
+    },
+    { id: 'pres_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Workbook or Reporting Tool': [
+    {
+      id: 'wb_tool', type: 'radio', label: 'What tool do you want this built in?',
+      options: ['Excel', 'Google Sheets', 'Either is fine', 'Not sure']
+    },
+    {
+      id: 'wb_purpose', type: 'checkbox', label: 'What does the workbook need to do?',
+      options: ['Track data over time', 'Calculate totals or summaries', 'Generate reports', 'Look up information', 'Automate a manual process', 'Other']
+    },
+    {
+      id: 'wb_users', type: 'radio', label: 'How many people will use this workbook?',
+      options: ['Just me', '2-5 people', 'More than 5']
+    },
+    {
+      id: 'wb_existing', type: 'radio', label: 'Do you have an existing file you want fixed or improved?',
+      options: ['Yes and I can share it', 'Yes but it is confidential', 'No, I need something built from scratch']
+    },
+    { id: 'wb_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Financial Model': [
+    {
+      id: 'fin_purpose', type: 'checkbox', label: 'What do you need the model to do?',
+      options: ['Revenue forecast', 'Expense budget', 'Cash flow projection', 'Scenario analysis', 'Loan or investment analysis', 'Break-even analysis', 'Other']
+    },
+    {
+      id: 'fin_horizon', type: 'radio', label: 'How far into the future should it project?',
+      options: ['3 months', '6 months', '12 months', '3-5 years']
+    },
+    {
+      id: 'fin_tool', type: 'radio', label: 'What tool should it be built in?',
+      options: ['Excel', 'Google Sheets', 'Either is fine']
+    },
+    {
+      id: 'fin_history', type: 'radio', label: 'Do you have historical financial data to work from?',
+      options: ['Yes', 'Some of it', 'No']
+    },
+    { id: 'fin_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Process Documentation': [
+    {
+      id: 'proc_count', type: 'radio', label: 'How many processes do you need documented?',
+      options: ['1', '2-5', 'More than 5', 'Not sure']
+    },
+    {
+      id: 'proc_written', type: 'radio', label: 'Are the processes currently written down anywhere?',
+      options: ['Yes, but outdated', 'Partially', 'No, they are all in people\'s heads']
+    },
+    {
+      id: 'proc_goal', type: 'checkbox', label: 'What is the goal of documenting them?',
+      options: ['Training new employees', 'Improving efficiency', 'Compliance or audit', 'Selling the business', 'Other']
+    },
+    { id: 'proc_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Data Cleanup': [
+    {
+      id: 'dc_format', type: 'checkbox', label: 'What format is your data in?',
+      options: ['Excel files', 'CSVs', 'Database exports', 'Paper records', 'PDFs', 'Other']
+    },
+    {
+      id: 'dc_volume', type: 'radio', label: 'How much data are we talking about?',
+      options: ['A few hundred rows', 'A few thousand rows', 'Tens of thousands of rows', 'I have no idea']
+    },
+    {
+      id: 'dc_problems', type: 'checkbox', label: 'What is wrong with it?',
+      options: ['Duplicates', 'Missing values', 'Inconsistent formatting', 'Multiple files that need merging', 'Data entry errors', 'Other']
+    },
+    {
+      id: 'dc_goal', type: 'radio', label: 'What do you want to do with the clean data?',
+      options: ['Build reports', 'Import into another system', 'Analyze it', 'Just have it organized', 'Not sure yet']
+    },
+    { id: 'dc_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Operations Assessment': [
+    {
+      id: 'ops_area', type: 'checkbox', label: 'What part of your business do you want assessed?',
+      options: ['Sales and revenue', 'Operations and fulfillment', 'Finance and accounting', 'Customer service', 'Supply chain', 'Everything']
+    },
+    {
+      id: 'ops_size', type: 'radio', label: 'How many employees does your business have?',
+      options: ['Just me', '2-10', '11-50', 'Over 50']
+    },
+    {
+      id: 'ops_why', type: 'radio', label: 'What prompted this?',
+      options: ['Revenue declining', 'Costs increasing', 'Growing too fast', 'Preparing to sell', 'Just want to improve', 'Other']
+    },
+    { id: 'ops_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ],
+
+  'Something Else': [
+    { id: 'other_desc', type: 'textarea', label: 'Describe what you need in a few sentences.', rows: 5 },
+    {
+      id: 'other_tools', type: 'text', label: 'What tools or software are involved, if any?',
+      placeholder: 'e.g., QuickBooks, Salesforce, Google Sheets'
+    },
+    {
+      id: 'other_timeline', type: 'radio', label: 'What is your timeline?',
+      options: ['This week', 'Next 2 weeks', 'This month', 'No rush', 'Just exploring']
+    },
+    { id: 'other_notes', type: 'textarea', label: 'Anything else we should know?', rows: 3 }
+  ]
+};
+
+/* ----------------------------------------------------------------
+   RENDER SCOPING QUESTIONS
+---------------------------------------------------------------- */
+function onaRenderScopingQuestions(category) {
+  var container = document.getElementById('ona-scoping-form');
+  var heading   = document.getElementById('ona-step3-heading');
+  container.innerHTML = '';
+
+  var questions = ONA_QUESTIONS[category];
+  if (!questions) return;
+
+  heading.textContent = 'Tell us more about your ' + category + ' project.';
+
+  questions.forEach(function(q) {
+    var field = document.createElement('div');
+    field.className = 'ona-scope-field';
+    field.innerHTML = onaRenderQuestion(q);
+    container.appendChild(field);
+  });
+}
+
+function onaRenderQuestion(q) {
+  var labelTag = '<label class="ona-scope-label" for="' + q.id + '">' + onaEscape(q.label) + '</label>';
+  var spanTag  = '<span class="ona-scope-label" id="' + q.id + '-label">' + onaEscape(q.label) + '</span>';
+  var html = '';
+
+  if (q.type === 'radio') {
+    html += spanTag;
+    html += '<div class="ona-scope-radio-group" role="radiogroup" aria-labelledby="' + q.id + '-label">';
+    q.options.forEach(function(opt) {
+      html += '<label><input type="radio" name="' + q.id + '" value="' + onaEscape(opt) + '" /><span>' + onaEscape(opt) + '</span></label>';
+    });
+    html += '</div>';
+
+  } else if (q.type === 'checkbox') {
+    html += spanTag;
+    html += '<div class="ona-scope-check-group" role="group" aria-labelledby="' + q.id + '-label">';
+    q.options.forEach(function(opt, i) {
+      var cbId = q.id + '_' + i;
+      html += '<label><input type="checkbox" name="' + q.id + '" id="' + cbId + '" value="' + onaEscape(opt) + '" /><span>' + onaEscape(opt) + '</span></label>';
+    });
+    html += '</div>';
+
+  } else if (q.type === 'textarea') {
+    html += labelTag;
+    html += '<textarea class="ona-scope-textarea" id="' + q.id + '" name="' + q.id + '" rows="' + (q.rows || 3) + '" placeholder="Optional"></textarea>';
+
+  } else if (q.type === 'text') {
+    html += labelTag;
+    html += '<input class="ona-scope-input" type="text" id="' + q.id + '" name="' + q.id + '" placeholder="' + onaEscape(q.placeholder || 'Optional') + '" autocomplete="off" />';
+  }
+
+  return html;
+}
+
+/* ----------------------------------------------------------------
+   COLLECT ANSWERS FROM STEP 3 FORM
+---------------------------------------------------------------- */
+function onaCollectScopingAnswers() {
+  var category  = ONA.selectedCategory;
+  var questions = ONA_QUESTIONS[category];
+  var answers   = {};
+
+  if (!questions) return answers;
+
+  questions.forEach(function(q) {
+    if (q.type === 'radio') {
+      var checked = document.querySelector('input[name="' + q.id + '"]:checked');
+      if (checked) answers[q.label] = checked.value;
+
+    } else if (q.type === 'checkbox') {
+      var boxes = document.querySelectorAll('input[name="' + q.id + '"]:checked');
+      var vals  = [];
+      boxes.forEach(function(b) { vals.push(b.value); });
+      if (vals.length) answers[q.label] = vals.join(', ');
+
+    } else if (q.type === 'textarea' || q.type === 'text') {
+      var el = document.getElementById(q.id);
+      if (el && el.value.trim()) answers[q.label] = el.value.trim();
+    }
+  });
+
+  return answers;
+}
+
+/* ----------------------------------------------------------------
+   COLLECT STEP 4 ANSWERS
+---------------------------------------------------------------- */
+function onaCollectStep4() {
+  var business = document.getElementById('ona-business');
+  var urgency  = document.querySelector('input[name="ona-urgency"]:checked');
+  var prior    = document.querySelector('input[name="ona-prior"]:checked');
+
+  return {
+    business: business ? business.value.trim() : '',
+    urgency:  urgency  ? urgency.value  : '',
+    prior:    prior    ? prior.value    : ''
+  };
+}
+
+/* ----------------------------------------------------------------
+   GENERATE SUMMARY
+---------------------------------------------------------------- */
+function onaGenerateSummary() {
+  ONA.scopingAnswers = onaCollectScopingAnswers();
+  var s4 = onaCollectStep4();
+
+  var category = ONA.selectedCategory || 'Not specified';
+  var business = s4.business || 'Not provided';
+  var urgency  = s4.urgency  || 'Not specified';
+  var prior    = s4.prior    || 'Not specified';
+  var date     = onaFormatDate();
+
+  // Build narrative paragraph
+  var narrative = onaBuildNarrative(category, ONA.scopingAnswers, s4);
+
+  // Build scoping answers list
+  var answersBlock = '';
+  var allAnswers = Object.assign({}, ONA.scopingAnswers);
+  if (s4.prior) allAnswers['Prior experience with consultants or freelancers'] = s4.prior;
+
+  var answerLines = [];
+  Object.keys(allAnswers).forEach(function(q) {
+    answerLines.push('- ' + q + ': ' + allAnswers[q]);
+  });
+
+  if (answerLines.length) {
+    answersBlock = 'SCOPING ANSWERS\n' + answerLines.join('\n');
+  } else {
+    answersBlock = 'SCOPING ANSWERS\nNo additional details provided.';
+  }
+
+  var text = [
+    'PROJECT SCOPE SUMMARY',
+    'Generated ' + date,
+    '',
+    'Service: ' + category,
+    'Business: ' + business,
+    'Timeline: ' + urgency,
+    '',
+    'DETAILS',
+    narrative,
+    '',
+    answersBlock
+  ].join('\n');
+
+  ONA.generatedText = text;
+
+  var display = document.getElementById('ona-summary-display');
+  display.textContent = text;
+
+  onaGoTo(5);
+}
+
+/* ----------------------------------------------------------------
+   NARRATIVE BUILDER
+---------------------------------------------------------------- */
+function onaBuildNarrative(category, answers, s4) {
+  var parts = [];
+
+  // Opening line
+  var business = s4.business ? 'Your ' + s4.business : 'Your business';
+
+  switch (category) {
+
+    case 'KPI Dashboard':
+      var tool    = answers['What tool do you want this built in?'] || 'a tool to be determined';
+      var metrics = answers['How many metrics do you need to track?'] || 'a set of';
+      var freq    = answers['How often do you need the dashboard updated?'] || '';
+      var data    = answers['Where does your data currently live?'] || '';
+      var sample  = answers['Do you have sample data or reports you can share?'] || '';
+      parts.push('You are looking for a KPI dashboard built in ' + tool + ' to track ' + metrics + ' business metrics.');
+      if (data) parts.push('Your data currently lives in ' + data + '.');
+      if (freq) parts.push('You need the dashboard updated ' + freq.toLowerCase() + '.');
+      if (sample) parts.push('Sample data or reports are ' + (sample === 'Yes' ? 'available to share' : sample === 'No' ? 'not yet available' : 'potentially available') + '.');
+      break;
+
+    case 'Presentation Build':
+      var purpose  = answers['What is the presentation for?'] || 'a presentation';
+      var slides   = answers['How many slides do you need?'] || 'an unspecified number of';
+      var content  = answers['Do you have content ready or do you need help writing it?'] || '';
+      var brand    = answers['Do you have brand guidelines or a template?'] || '';
+      var deadline = answers['What is your deadline?'] || '';
+      parts.push('You need a professional presentation built for ' + purpose.toLowerCase() + ', targeting ' + slides.toLowerCase() + ' slides.');
+      if (content) parts.push('Content status: ' + content.toLowerCase() + '.');
+      if (brand)   parts.push('Brand guidelines or templates are ' + (brand === 'Yes' ? 'available' : brand === 'No' ? 'not available' : 'unclear') + '.');
+      if (deadline) parts.push('Your target deadline is ' + deadline.toLowerCase() + '.');
+      break;
+
+    case 'Workbook or Reporting Tool':
+      var wbtool    = answers['What tool do you want this built in?'] || 'a tool to be determined';
+      var wbpurpose = answers['What does the workbook need to do?'] || '';
+      var wbusers   = answers['How many people will use this workbook?'] || '';
+      var wbexist   = answers['Do you have an existing file you want fixed or improved?'] || '';
+      parts.push('You need a workbook or reporting tool built in ' + wbtool + '.');
+      if (wbpurpose) parts.push('The tool needs to: ' + wbpurpose.toLowerCase() + '.');
+      if (wbusers)   parts.push('Expected users: ' + wbusers.toLowerCase() + '.');
+      if (wbexist)   parts.push('Existing file situation: ' + wbexist.toLowerCase() + '.');
+      break;
+
+    case 'Financial Model':
+      var finpurpose = answers['What do you need the model to do?'] || 'a financial analysis';
+      var finhorizon = answers['How far into the future should it project?'] || '';
+      var fintool    = answers['What tool should it be built in?'] || 'a tool to be determined';
+      var finhistory = answers['Do you have historical financial data to work from?'] || '';
+      parts.push('You need a financial model built in ' + fintool + ' covering ' + finpurpose.toLowerCase() + '.');
+      if (finhorizon) parts.push('The model should project ' + finhorizon.toLowerCase() + ' into the future.');
+      if (finhistory) parts.push('Historical financial data availability: ' + finhistory.toLowerCase() + '.');
+      break;
+
+    case 'Process Documentation':
+      var proccount   = answers['How many processes do you need documented?'] || 'one or more';
+      var procwritten = answers['Are the processes currently written down anywhere?'] || '';
+      var procgoal    = answers['What is the goal of documenting them?'] || '';
+      parts.push('You need ' + proccount.toLowerCase() + ' business process' + (proccount === '1' ? '' : 'es') + ' documented.');
+      if (procwritten) parts.push('Current documentation status: ' + procwritten.toLowerCase() + '.');
+      if (procgoal)    parts.push('The goal of this work is: ' + procgoal.toLowerCase() + '.');
+      break;
+
+    case 'Data Cleanup':
+      var dcformat   = answers['What format is your data in?'] || 'one or more formats';
+      var dcvolume   = answers['How much data are we talking about?'] || '';
+      var dcproblems = answers['What is wrong with it?'] || '';
+      var dcgoal     = answers['What do you want to do with the clean data?'] || '';
+      parts.push('You need data cleanup work on files in the following format(s): ' + dcformat.toLowerCase() + '.');
+      if (dcvolume)   parts.push('Estimated data volume: ' + dcvolume.toLowerCase() + '.');
+      if (dcproblems) parts.push('Known data issues include: ' + dcproblems.toLowerCase() + '.');
+      if (dcgoal)     parts.push('Once cleaned, you plan to: ' + dcgoal.toLowerCase() + '.');
+      break;
+
+    case 'Operations Assessment':
+      var opsarea  = answers['What part of your business do you want assessed?'] || 'your business operations';
+      var opssize  = answers['How many employees does your business have?'] || '';
+      var opswhy   = answers['What prompted this?'] || '';
+      parts.push('You are looking for an operations assessment focused on: ' + opsarea.toLowerCase() + '.');
+      if (opssize) parts.push('Your business has ' + opssize.toLowerCase() + ' employee(s).');
+      if (opswhy)  parts.push('The primary driver for this assessment: ' + opswhy.toLowerCase() + '.');
+      break;
+
+    case 'Something Else':
+      var otherdesc  = answers['Describe what you need in a few sentences.'] || '';
+      var othertools = answers['What tools or software are involved, if any?'] || '';
+      var othertl    = answers['What is your timeline?'] || '';
+      if (otherdesc) parts.push(otherdesc);
+      if (othertools) parts.push('Tools or software involved: ' + othertools + '.');
+      if (othertl)    parts.push('Timeline: ' + othertl.toLowerCase() + '.');
+      if (!parts.length) parts.push('You have a project that does not fit standard categories. Additional details were not provided.');
+      break;
+
+    default:
+      parts.push('You have submitted a project inquiry. Please see the scoping answers below for details.');
+  }
+
+  if (s4.urgency) {
+    parts.push('Overall timeline urgency: ' + s4.urgency.toLowerCase() + '.');
+  }
+
+  return parts.join(' ');
+}
+
+/* ----------------------------------------------------------------
+   COPY TO CLIPBOARD
+---------------------------------------------------------------- */
+function onaCopy() {
+  var text    = ONA.generatedText;
+  var confirm = document.getElementById('ona-copy-confirm');
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      onaShowCopyConfirm(confirm);
+    }).catch(function() {
+      onaFallbackCopy(text, confirm);
+    });
+  } else {
+    onaFallbackCopy(text, confirm);
+  }
+}
+
+function onaFallbackCopy(text, confirm) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    onaShowCopyConfirm(confirm);
+  } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function onaShowCopyConfirm(el) {
+  el.classList.add('visible');
+  setTimeout(function() { el.classList.remove('visible'); }, 2500);
+}
+
+/* ----------------------------------------------------------------
+   EMAIL
+---------------------------------------------------------------- */
+function onaEmail() {
+  var subject = 'Project Inquiry: ' + (ONA.selectedCategory || 'General');
+  var body    = ONA.generatedText;
+  var mailto  = 'mailto:info@oldnorthanalytics.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+}
+
+/* ----------------------------------------------------------------
+   RESET
+---------------------------------------------------------------- */
+function onaReset() {
+  ONA.currentStep      = 1;
+  ONA.selectedCategory = null;
+  ONA.scopingAnswers   = {};
+  ONA.generatedText    = '';
+
+  // Deselect all cards
+  document.querySelectorAll('.ona-scope-card').forEach(function(c) {
+    c.classList.remove('selected');
+    c.setAttribute('aria-checked', 'false');
+  });
+
+  // Clear Step 4 inputs
+  var biz = document.getElementById('ona-business');
+  if (biz) biz.value = '';
+  document.querySelectorAll('input[name="ona-urgency"], input[name="ona-prior"]').forEach(function(r) {
+    r.checked = false;
+  });
+
+  // Clear scoping form
+  document.getElementById('ona-scoping-form').innerHTML = '';
+
+  // Clear summary
+  document.getElementById('ona-summary-display').textContent = '';
+
+  // Go to step 1
+  document.querySelectorAll('.ona-scope-step').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  document.getElementById('ona-step-1').classList.add('active');
+  onaUpdateProgress(1);
+}
+
+/* ----------------------------------------------------------------
+   UTILITIES
+---------------------------------------------------------------- */
+function onaEscape(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function onaFormatDate() {
+  var d = new Date();
+  var months = ['January','February','March','April','May','June',
+                 'July','August','September','October','November','December'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+// Allow keyboard selection of cards
+document.addEventListener('keydown', function(e) {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('ona-scope-card')) {
+    e.preventDefault();
+    onaSelectCategory(e.target);
+  }
+});
+
+</script>
+</body>
+</html>
