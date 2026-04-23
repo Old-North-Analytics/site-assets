@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROI Calculator | Old North Analytics</title>
+<style>
+  /* ── Brand tokens ─────────────────────────────────────────── */
+  :root {
+    --forest:   #22493D;
+    --sage:     #537C6F;
+    --mint:     #EAF6F2;
+    --accent:   #A8D5C8;
+    --near-blk: #1A1A1A;
+    --white:    #ffffff;
+    --muted:    #64748B;
+    --warn:     #D97706;
+    --success:  #16A34A;
+    --border:   #D1E8E2;
+    --card-bg:  #FAFCFB;
+    --radius:   6px;
+    --shadow:   0 1px 4px rgba(0,0,0,0.06);
+    --shadow-h: 0 4px 18px rgba(0,0,0,0.10);
+  }
+
+  /* ── Reset ────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--white);
+    color: var(--near-blk);
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ── Header ───────────────────────────────────────────────── */
+  .header {
+    background: var(--forest);
+    padding: 40px 24px 36px;
+    text-align: center;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .header-logo {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+    color: var(--white); letter-spacing: -0.5px;
+  }
+  .header-brand-name {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .header p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  /* ── Main layout ──────────────────────────────────────────── */
+  .container {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── Sliders section ──────────────────────────────────────── */
+  .sliders-section {
+    padding: 36px 0 28px;
+  }
+  .slider-group {
+    margin-bottom: 28px;
+  }
+  .slider-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .slider-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--near-blk);
+  }
+  .slider-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--forest);
+  }
+  .slider-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--forest);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    border-color: var(--sage);
+    box-shadow: 0 2px 8px rgba(34,73,61,0.2);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--forest);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    cursor: pointer;
+  }
+  /* filled track via gradient updated by JS */
+  input[type=range].filled {
+    background: linear-gradient(to right, var(--forest) 0%, var(--forest) var(--pct, 25%), var(--border) var(--pct, 25%), var(--border) 100%);
+  }
+
+  /* ── Reset button ─────────────────────────────────────────── */
+  .reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    margin-top: 4px;
+  }
+  .reset-btn:hover {
+    border-color: var(--sage);
+    color: var(--forest);
+  }
+  .reset-btn svg { flex-shrink: 0; }
+
+  /* ── Results section ──────────────────────────────────────── */
+  .results-section {
+    background: var(--mint);
+    padding: 32px 24px;
+    margin-top: 4px;
+  }
+  .kpi-grid {
+    max-width: 600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    text-align: center;
+    align-items: center;
+  }
+  .kpi-value {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+    color: var(--forest);
+    line-height: 1;
+  }
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 6px;
+  }
+
+  /* Donut */
+  .donut-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto; }
+  .donut-wrap svg { transform: rotate(-90deg); }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    color: var(--forest);
+  }
+
+  /* Bar charts */
+  .bars-section {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .bars-section h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--forest);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .bar-group { margin-bottom: 22px; }
+  .bar-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+  .bar-tag {
+    width: 48px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--white);
+    transition: width 0.5s ease;
+    min-width: 8%;
+  }
+  .bar-fill.before { background: var(--warn); }
+  .bar-fill.after  { background: var(--success); }
+
+  /* Methodology card */
+  .method-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-top: 28px;
+    background: var(--card-bg);
+  }
+  .method-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+  .method-card p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  /* ── CTA footer ───────────────────────────────────────────── */
+  .cta-footer {
+    background: var(--forest);
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .cta-footer h3 {
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 10px;
+    line-height: 1.15;
+  }
+  .cta-footer .cta-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .cta-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    color: var(--forest);
+    padding: 14px 28px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.22s ease;
+  }
+  .cta-btn-primary:hover {
+    background: var(--mint);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-h);
+  }
+  .cta-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--accent);
+    padding: 14px 28px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--accent);
+    transition: all 0.22s ease;
+  }
+  .cta-btn-secondary:hover {
+    background: rgba(168,213,200,0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-h);
+  }
+  .cta-disclaimer {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 16px;
+  }
+  .cta-footer-line {
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* ── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">ONA</div>
+    <span class="header-brand-name">Old North Analytics</span>
+  </div>
+  <h1>What Are Broken Spreadsheets<br>Costing Your Business?</h1>
+  <p>Answer four questions. See where the time and money go.</p>
+</div>
+
+<!-- Sliders -->
+<div class="sliders-section">
+  <div class="container">
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-label">Hours per week on manual reporting</span>
+        <span><span class="slider-value" id="val-hrs">10</span><span class="slider-unit">hrs/wk</span></span>
+      </div>
+      <input type="range" id="sl-hrs" class="filled" min="2" max="40" step="1" value="10">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-label">Number of spreadsheets you maintain</span>
+        <span><span class="slider-value" id="val-files">4</span><span class="slider-unit">files</span></span>
+      </div>
+      <input type="range" id="sl-files" class="filled" min="1" max="20" step="1" value="4">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-label">People touching those files</span>
+        <span><span class="slider-value" id="val-people">2</span><span class="slider-unit">people</span></span>
+      </div>
+      <input type="range" id="sl-people" class="filled" min="1" max="15" step="1" value="2">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-label">Average hourly cost per person</span>
+        <span><span class="slider-value" id="val-rate">25</span><span class="slider-unit">$/hr</span></span>
+      </div>
+      <input type="range" id="sl-rate" class="filled" min="12" max="75" step="1" value="25">
+    </div>
+
+    <button class="reset-btn" id="reset-btn" aria-label="Reset all values to defaults">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.49"/>
+      </svg>
+      Reset
+    </button>
+
+  </div>
+</div>
+
+<!-- Results: KPI strip -->
+<div class="results-section">
+  <div class="kpi-grid">
+    <div>
+      <div class="kpi-value" id="kpi-savings">--</div>
+      <div class="kpi-label">Annual Savings</div>
+    </div>
+    <div>
+      <div class="kpi-value" id="kpi-hours">--</div>
+      <div class="kpi-label">Hours Recovered</div>
+    </div>
+    <div>
+      <div class="donut-wrap">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#D1E8E2" stroke-width="7"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#22493D" stroke-width="7"
+            stroke-linecap="round" id="donut-arc"
+            stroke-dasharray="0 201"
+            style="transition: stroke-dasharray 0.5s ease;"/>
+        </svg>
+        <div class="donut-center" id="donut-label">0%</div>
+      </div>
+      <div class="kpi-label">Cost Reduction</div>
+    </div>
+  </div>
+</div>
+
+<!-- Results: Bar charts -->
+<div class="bars-section">
+  <div class="container" style="padding:0;">
+    <h2>Where the savings come from</h2>
+
+    <div class="bar-group">
+      <div class="bar-group-label">Labor Hours / Year</div>
+      <div class="bar-row">
+        <span class="bar-tag">Now</span>
+        <div class="bar-track"><div class="bar-fill before" id="bar-hrs-before" style="width:100%">0 hrs</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-tag">After</span>
+        <div class="bar-track"><div class="bar-fill after" id="bar-hrs-after" style="width:35%">0 hrs</div></div>
+      </div>
+    </div>
+
+    <div class="bar-group">
+      <div class="bar-group-label">Labor Cost / Year</div>
+      <div class="bar-row">
+        <span class="bar-tag">Now</span>
+        <div class="bar-track"><div class="bar-fill before" id="bar-cost-before" style="width:100%">$0</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-tag">After</span>
+        <div class="bar-track"><div class="bar-fill after" id="bar-cost-after" style="width:35%">$0</div></div>
+      </div>
+    </div>
+
+    <div class="bar-group">
+      <div class="bar-group-label">Error Correction Cost / Year</div>
+      <div class="bar-row">
+        <span class="bar-tag">Now</span>
+        <div class="bar-track"><div class="bar-fill before" id="bar-err-before" style="width:100%">$0</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-tag">After</span>
+        <div class="bar-track"><div class="bar-fill after" id="bar-err-after" style="width:15%">$0</div></div>
+      </div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-card-label">How this is calculated</div>
+      <p>Custom tools typically reduce manual reporting time by 65%. Manual spreadsheet error rates average 8% of data entries, and each error costs roughly 1.5x the hourly rate to find and fix. Purpose-built tools eliminate about 85% of those errors. Your real numbers will vary based on complexity.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Footer - always visible -->
+<div class="cta-footer">
+  <h3>Ready to build something that actually works?</h3>
+  <p class="cta-sub">Describe the problem. Get a scoped, fixed-price proposal.</p>
+  <div class="cta-buttons">
+    <a href="mailto:info@oldnorthanalytics.com" class="cta-btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/>
+      </svg>
+      info@oldnorthanalytics.com
+    </a>
+    <a href="tel:9193071722" class="cta-btn-secondary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+      </svg>
+      919-307-1722
+    </a>
+  </div>
+  <p class="cta-disclaimer">Results shown are high-level estimates intended for illustrative purposes only. Actual cost savings and efficiency gains depend on your specific business operations, staffing structure, data complexity, and implementation approach. Individual results will vary.</p>
+  <p class="cta-footer-line">Old North Analytics, LLC &middot; Raleigh, NC &middot; oldnorthanalytics.com</p>
+</div>
+
+<script>
+  // ── Defaults ────────────────────────────────────────────────
+  const DEFAULTS = { hrs: 10, files: 4, people: 2, rate: 25 };
+
+  // ── Element refs ────────────────────────────────────────────
+  const slHrs    = document.getElementById('sl-hrs');
+  const slFiles  = document.getElementById('sl-files');
+  const slPeople = document.getElementById('sl-people');
+  const slRate   = document.getElementById('sl-rate');
+
+  const valHrs    = document.getElementById('val-hrs');
+  const valFiles  = document.getElementById('val-files');
+  const valPeople = document.getElementById('val-people');
+  const valRate   = document.getElementById('val-rate');
+
+  const kpiSavings = document.getElementById('kpi-savings');
+  const kpiHours   = document.getElementById('kpi-hours');
+  const donutArc   = document.getElementById('donut-arc');
+  const donutLabel = document.getElementById('donut-label');
+
+  const barHrsBefore   = document.getElementById('bar-hrs-before');
+  const barHrsAfter    = document.getElementById('bar-hrs-after');
+  const barCostBefore  = document.getElementById('bar-cost-before');
+  const barCostAfter   = document.getElementById('bar-cost-after');
+  const barErrBefore   = document.getElementById('bar-err-before');
+  const barErrAfter    = document.getElementById('bar-err-after');
+
+  const resetBtn = document.getElementById('reset-btn');
+
+  // ── Formatters ──────────────────────────────────────────────
+  function fmtDollar(n) {
+    if (n >= 1000) return '$' + (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtHours(n) {
+    return Math.round(n).toLocaleString() + ' hrs';
+  }
+  function fmtDollarFull(n) {
+    return '$' + Math.round(n).toLocaleString();
+  }
+
+  // ── Slider fill track ───────────────────────────────────────
+  function updateTrack(el) {
+    const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+    el.style.setProperty('--pct', pct + '%');
+  }
+
+  // ── Bar widths ──────────────────────────────────────────────
+  function setBar(fillEl, val, max, formatter) {
+    const pct = Math.max((val / max) * 100, 8);
+    fillEl.style.width = pct + '%';
+    fillEl.textContent = formatter(val);
+  }
+
+  // ── Core calc ───────────────────────────────────────────────
+  function recalc() {
+    const hrs    = +slHrs.value;
+    const files  = +slFiles.value;
+    const people = +slPeople.value;
+    const rate   = +slRate.value;
+
+    // Display values
+    valHrs.textContent    = hrs;
+    valFiles.textContent  = files;
+    valPeople.textContent = people;
+    valRate.textContent   = rate;
+
+    // Update track fills
+    [slHrs, slFiles, slPeople, slRate].forEach(updateTrack);
+
+    // Labor hours
+    const hrsPerYear   = 52 * hrs * people;           // total hrs/yr across team
+    const hrsSaved     = 0.65 * hrsPerYear;           // 65% reduction
+    const hrsAfterVal  = hrsPerYear - hrsSaved;
+
+    // Labor cost
+    const costBefore   = hrsPerYear * rate;
+    const costAfter    = hrsAfterVal * rate;
+    const costSaved    = costBefore - costAfter;
+
+    // Error correction
+    const errRate      = 0.08;                         // 8% of entries
+    const errCostMult  = 1.5;
+    const errBefore    = errRate * hrsPerYear * files * errCostMult * rate * 0.1;
+    const errAfter     = 0.15 * errBefore;             // 85% error reduction
+    const errSaved     = errBefore - errAfter;
+
+    // Totals
+    const totalBefore  = costBefore + errBefore;
+    const totalSaved   = costSaved + errSaved;
+    const reductionPct = totalBefore > 0 ? (totalSaved / totalBefore) * 100 : 0;
+
+    // KPI strip
+    kpiSavings.textContent = fmtDollar(totalSaved);
+    kpiHours.textContent   = fmtHours(Math.round(hrsSaved + 0.85 * (errBefore / rate)));
+
+    // Donut
+    const circumference = 2 * Math.PI * 32; // r=32
+    const dash = (reductionPct / 100) * circumference;
+    donutArc.setAttribute('stroke-dasharray', `${dash.toFixed(1)} ${circumference.toFixed(1)}`);
+    donutLabel.textContent = Math.round(reductionPct) + '%';
+
+    // Bar charts
+    const maxHrs  = Math.max(hrsPerYear, hrsAfterVal, 1);
+    const maxCost = Math.max(costBefore, costAfter, 1);
+    const maxErr  = Math.max(errBefore, errAfter, 1);
+
+    setBar(barHrsBefore,  hrsPerYear,  maxHrs,  fmtHours);
+    setBar(barHrsAfter,   hrsAfterVal, maxHrs,  fmtHours);
+    setBar(barCostBefore, costBefore,  maxCost, fmtDollarFull);
+    setBar(barCostAfter,  costAfter,   maxCost, fmtDollarFull);
+    setBar(barErrBefore,  errBefore,   maxErr,  fmtDollarFull);
+    setBar(barErrAfter,   errAfter,    maxErr,  fmtDollarFull);
+  }
+
+  // ── Reset ───────────────────────────────────────────────────
+  function resetAll() {
+    slHrs.value    = DEFAULTS.hrs;
+    slFiles.value  = DEFAULTS.files;
+    slPeople.value = DEFAULTS.people;
+    slRate.value   = DEFAULTS.rate;
+    recalc();
+  }
+
+  // ── Event listeners ─────────────────────────────────────────
+  [slHrs, slFiles, slPeople, slRate].forEach(el => el.addEventListener('input', recalc));
+  resetBtn.addEventListener('click', resetAll);
+
+  // ── Init ────────────────────────────────────────────────────
+  recalc();
+</script>
+</body>
+</html>
